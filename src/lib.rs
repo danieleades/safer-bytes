@@ -1,4 +1,4 @@
-//! A sketch of an alternative implementation of the `tor-bytes` crate
+//! A safe, non-panicking wrapper around [`bytes::Buf`]
 
 #![deny(
     clippy::all,
@@ -11,7 +11,7 @@
 use bytes::Buf;
 pub use bytes::BufMut;
 
-mod error;
+pub mod error;
 mod safe_buf;
 
 /// Unchecked buffer reading methods
@@ -19,6 +19,7 @@ pub mod unchecked {
     pub use bytes::Buf;
 }
 
+#[doc(inline)]
 pub use error::Error;
 
 /// Type alias for the return type of fallible functions in this crate
