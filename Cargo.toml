@@ -1,5 +1,5 @@
 [package]
-name = "safe-bytes"
+name = "safer-bytes"
 version = "0.1.0"
 edition = "2018"
 description = "safe, non-panicking wrappers around the 'bytes' crate"
