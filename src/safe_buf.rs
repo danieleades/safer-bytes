@@ -8,7 +8,7 @@ macro_rules! get_primitive_checked {
     ($t:ty, $width:literal) => {
         paste! {
             #[doc = "This method wraps [`Buf::get_" $t "`] with a bounds check to ensure there are enough bytes remaining, without panicking."]
-            fn [<get_ $t _checked>](&mut self) -> std::result::Result<$t, error::Truncated> {
+            fn [<try_get_ $t>](&mut self) -> std::result::Result<$t, error::Truncated> {
                 if self.remaining() >= $width {
                     Ok(self.[<get_ $t>]())
                 } else {
@@ -26,13 +26,13 @@ pub trait SafeBuf: Buf {
     /// there are enough remaining
     ///
     /// Use this version when you know the array length at compile time.
-    /// Otherwise use [`SafeBuf::peek_checked`].
+    /// Otherwise use [`SafeBuf::try_peek`].
     ///
     /// # Errors
     ///
     /// This method will return an error if the number of bytes remaining in the
     /// buffer is insufficent
-    fn peek_checked_const<const N: usize>(&mut self) -> Result<[u8; N], error::Truncated> {
+    fn try_peek_const<const N: usize>(&mut self) -> Result<[u8; N], error::Truncated> {
         if self.remaining() < N {
             Err(error::Truncated)
         } else {
@@ -46,14 +46,14 @@ pub trait SafeBuf: Buf {
     /// there are enough remaining
     ///
     /// Use this version when you know the array length at compile time.
-    /// Otherwise use [`SafeBuf::take_checked`].
+    /// Otherwise use [`SafeBuf::try_take`].
     ///
     /// # Errors
     ///
     /// This method will return an error if the number of bytes remaining in the
     /// buffer is insufficent
-    fn take_checked_const<const N: usize>(&mut self) -> Result<[u8; N], error::Truncated> {
-        let bytes = self.peek_checked_const()?;
+    fn try_take_const<const N: usize>(&mut self) -> Result<[u8; N], error::Truncated> {
+        let bytes = self.try_peek_const()?;
         self.advance(N);
         Ok(bytes)
     }
@@ -61,14 +61,14 @@ pub trait SafeBuf: Buf {
     /// Peek at a given number of bytes from the buffer, with a check to ensure
     /// there are enough remaining
     ///
-    /// If you know the array length at compile time. Otherwise use
-    /// [`SafeBuf::peek_checked_const`].
+    /// If you know the array length at compile time, use
+    /// [`SafeBuf::try_peek_const`].
     ///
     /// # Errors
     ///
     /// This method will return an error if the number of bytes remaining in the
     /// buffer is insufficent
-    fn peek_checked(&mut self, len: usize) -> std::result::Result<Bytes, error::Truncated> {
+    fn try_peek(&mut self, len: usize) -> std::result::Result<Bytes, error::Truncated> {
         if self.remaining() < len {
             Err(error::Truncated)
         } else {
@@ -79,15 +79,15 @@ pub trait SafeBuf: Buf {
     /// Take a given number of bytes from the buffer, with a check to ensure
     /// there are enough remaining
     ///
-    /// If you know the array length at compile time. Otherwise use
-    /// [`SafeBuf::take_checked_const`].
+    /// If you know the array length at compile time, use
+    /// [`SafeBuf::try_take_const`].
     ///
     /// # Errors
     ///
     /// This method will return an error if the number of bytes remaining in the
     /// buffer is insufficent
-    fn take_checked(&mut self, len: usize) -> std::result::Result<Bytes, error::Truncated> {
-        let bytes = self.peek_checked(len)?;
+    fn try_take(&mut self, len: usize) -> std::result::Result<Bytes, error::Truncated> {
+        let bytes = self.try_peek(len)?;
         self.advance(len);
         Ok(bytes)
     }
