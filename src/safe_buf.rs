@@ -1,7 +1,6 @@
 //! Extension traits for extracting custom objects from a [`bytes::Buf`]
 
-use crate::error;
-use crate::FromBuf;
+use crate::{error, FromBuf};
 use bytes::{Buf, Bytes};
 use paste::paste;
 
@@ -23,13 +22,16 @@ macro_rules! get_primitive_checked {
 
 /// Extension trait for [`bytes::Buf`]
 pub trait SafeBuf: Buf {
-    /// Peek at a given number of bytes from the buffer, with a check to ensure there are enough remaining
+    /// Peek at a given number of bytes from the buffer, with a check to ensure
+    /// there are enough remaining
     ///
-    /// Use this version when you know the array length at compile time. Otherwise use [`SafeBuf::peek_checked`].
+    /// Use this version when you know the array length at compile time.
+    /// Otherwise use [`SafeBuf::peek_checked`].
     ///
     /// # Errors
     ///
-    /// This method will return an error if the number of bytes remaining in the buffer is insufficent
+    /// This method will return an error if the number of bytes remaining in the
+    /// buffer is insufficent
     fn peek_checked_const<const N: usize>(&mut self) -> Result<[u8; N], error::Truncated> {
         if self.remaining() < N {
             Err(error::Truncated)
@@ -40,26 +42,32 @@ pub trait SafeBuf: Buf {
         }
     }
 
-    /// Take a given number of bytes from the buffer, with a check to ensure there are enough remaining
+    /// Take a given number of bytes from the buffer, with a check to ensure
+    /// there are enough remaining
     ///
-    /// Use this version when you know the array length at compile time. Otherwise use [`SafeBuf::take_checked`].
+    /// Use this version when you know the array length at compile time.
+    /// Otherwise use [`SafeBuf::take_checked`].
     ///
     /// # Errors
     ///
-    /// This method will return an error if the number of bytes remaining in the buffer is insufficent
+    /// This method will return an error if the number of bytes remaining in the
+    /// buffer is insufficent
     fn take_checked_const<const N: usize>(&mut self) -> Result<[u8; N], error::Truncated> {
         let bytes = self.peek_checked_const()?;
         self.advance(N);
         Ok(bytes)
     }
 
-    /// Peek at a given number of bytes from the buffer, with a check to ensure there are enough remaining
+    /// Peek at a given number of bytes from the buffer, with a check to ensure
+    /// there are enough remaining
     ///
-    /// If you know the array length at compile time. Otherwise use [`SafeBuf::peek_checked_const`].
+    /// If you know the array length at compile time. Otherwise use
+    /// [`SafeBuf::peek_checked_const`].
     ///
     /// # Errors
     ///
-    /// This method will return an error if the number of bytes remaining in the buffer is insufficent
+    /// This method will return an error if the number of bytes remaining in the
+    /// buffer is insufficent
     fn peek_checked(&mut self, len: usize) -> std::result::Result<Bytes, error::Truncated> {
         if self.remaining() < len {
             Err(error::Truncated)
@@ -68,13 +76,16 @@ pub trait SafeBuf: Buf {
         }
     }
 
-    /// Take a given number of bytes from the buffer, with a check to ensure there are enough remaining
+    /// Take a given number of bytes from the buffer, with a check to ensure
+    /// there are enough remaining
     ///
-    /// If you know the array length at compile time. Otherwise use [`SafeBuf::take_checked_const`].
+    /// If you know the array length at compile time. Otherwise use
+    /// [`SafeBuf::take_checked_const`].
     ///
     /// # Errors
     ///
-    /// This method will return an error if the number of bytes remaining in the buffer is insufficent
+    /// This method will return an error if the number of bytes remaining in the
+    /// buffer is insufficent
     fn take_checked(&mut self, len: usize) -> std::result::Result<Bytes, error::Truncated> {
         let bytes = self.peek_checked(len)?;
         self.advance(len);
@@ -85,7 +96,8 @@ pub trait SafeBuf: Buf {
     ///
     /// # Errors
     ///
-    /// This method will return an error if the number of bytes remaining in the buffer is insufficent, or if the type cannot be parsed from the bytes.
+    /// This method will return an error if the number of bytes remaining in the
+    /// buffer is insufficent, or if the type cannot be parsed from the bytes.
     fn extract<T>(&mut self) -> crate::Result<T>
     where
         T: FromBuf,
@@ -97,7 +109,8 @@ pub trait SafeBuf: Buf {
     ///
     /// # Errors
     ///
-    /// this method will return [`error::ExtraneousBytes`] if there are bytes left in the buffer.
+    /// this method will return [`error::ExtraneousBytes`] if there are bytes
+    /// left in the buffer.
     fn should_be_exhausted(&self) -> std::result::Result<(), error::ExtraneousBytes> {
         if self.has_remaining() {
             Err(error::ExtraneousBytes)
