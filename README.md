@@ -1,3 +1,3 @@
-# README
+# Safe-Bytes
 
-todo
+A safe, non-panicking wrapper around the [bytes](https://github.com/tokio-rs/bytes) crate
