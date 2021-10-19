@@ -142,6 +142,8 @@ pub trait SafeBuf: Buf {
     get_primitive_checked_be!(i32, 4);
     get_primitive_checked_be!(u64, 8);
     get_primitive_checked_be!(i64, 8);
+    get_primitive_checked_be!(u128, 16);
+    get_primitive_checked_be!(i128, 16);
 
     get_primitive_checked_le!(u16, 2);
     get_primitive_checked_le!(i16, 2);
@@ -149,6 +151,8 @@ pub trait SafeBuf: Buf {
     get_primitive_checked_le!(i32, 4);
     get_primitive_checked_le!(u64, 8);
     get_primitive_checked_le!(i64, 8);
+    get_primitive_checked_le!(u128, 16);
+    get_primitive_checked_le!(i128, 16);
 }
 
 impl<T> SafeBuf for T where T: Buf {}
