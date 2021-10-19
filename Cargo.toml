@@ -4,6 +4,9 @@ version = "0.1.0"
 edition = "2018"
 description = "safe, non-panicking wrappers around the 'bytes' crate"
 license = "MIT"
+repository = "https://github.com/danieleades/safer-bytes"
+keywords = ["buffers", "zero-copy", "io"]
+categories = ["network-programming", "data-structures"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
