@@ -4,7 +4,7 @@ use crate::{error, FromBuf};
 use bytes::{Buf, Bytes};
 use paste::paste;
 
-macro_rules! get_primitive_checked {
+macro_rules! get_primitive_checked_be {
     ($t:ty, $width:literal) => {
         paste! {
             #[doc = "This method wraps [`Buf::get_" $t "`] with a bounds check to ensure there are enough bytes remaining, without panicking."]
@@ -16,7 +16,21 @@ macro_rules! get_primitive_checked {
                 }
             }
         }
+    };
+}
 
+macro_rules! get_primitive_checked_le {
+    ($t:ty, $width:literal) => {
+        paste! {
+            #[doc = "This method wraps [`Buf::get_" $t "_le`] with a bounds check to ensure there are enough bytes remaining, without panicking."]
+            fn [<try_get_ $t _le>](&mut self) -> std::result::Result<$t, error::Truncated> {
+                if self.remaining() >= $width {
+                    Ok(self.[<get_ $t _le>]())
+                } else {
+                    Err(error::Truncated)
+                }
+            }
+        }
     };
 }
 
@@ -119,14 +133,22 @@ pub trait SafeBuf: Buf {
         }
     }
 
-    get_primitive_checked!(u8, 1);
-    get_primitive_checked!(i8, 1);
-    get_primitive_checked!(u16, 2);
-    get_primitive_checked!(i16, 2);
-    get_primitive_checked!(u32, 4);
-    get_primitive_checked!(i32, 4);
-    get_primitive_checked!(u64, 8);
-    get_primitive_checked!(i64, 8);
+    get_primitive_checked_be!(u8, 1);
+    get_primitive_checked_be!(i8, 1);
+
+    get_primitive_checked_be!(u16, 2);
+    get_primitive_checked_be!(i16, 2);
+    get_primitive_checked_be!(u32, 4);
+    get_primitive_checked_be!(i32, 4);
+    get_primitive_checked_be!(u64, 8);
+    get_primitive_checked_be!(i64, 8);
+
+    get_primitive_checked_le!(u16, 2);
+    get_primitive_checked_le!(i16, 2);
+    get_primitive_checked_le!(u32, 4);
+    get_primitive_checked_le!(i32, 4);
+    get_primitive_checked_le!(u64, 8);
+    get_primitive_checked_le!(i64, 8);
 }
 
 impl<T> SafeBuf for T where T: Buf {}
