@@ -10,7 +10,7 @@
 #![warn(clippy::pedantic)]
 
 use bytes::Buf;
-pub use bytes::BufMut;
+pub use bytes::{BufMut, Bytes, BytesMut};
 
 pub mod error;
 mod safe_buf;

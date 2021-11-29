@@ -36,53 +36,14 @@ macro_rules! get_primitive_checked_le {
 
 /// Extension trait for [`bytes::Buf`]
 pub trait SafeBuf: Buf {
-    /// Peek at a given number of bytes from the buffer, with a check to ensure
-    /// there are enough remaining
-    ///
-    /// Use this version when you know the array length at compile time.
-    /// Otherwise use [`SafeBuf::try_peek`].
-    ///
-    /// # Errors
-    ///
-    /// This method will return an error if the number of bytes remaining in the
-    /// buffer is insufficent
-    fn try_peek_const<const N: usize>(&mut self) -> Result<[u8; N], error::Truncated> {
-        if self.remaining() < N {
-            Err(error::Truncated)
-        } else {
-            let mut bytes = [0_u8; N];
-            self.copy_to_slice(&mut bytes);
-            Ok(bytes)
-        }
-    }
-
     /// Take a given number of bytes from the buffer, with a check to ensure
     /// there are enough remaining
     ///
-    /// Use this version when you know the array length at compile time.
-    /// Otherwise use [`SafeBuf::try_take`].
-    ///
     /// # Errors
     ///
     /// This method will return an error if the number of bytes remaining in the
     /// buffer is insufficent
-    fn try_take_const<const N: usize>(&mut self) -> Result<[u8; N], error::Truncated> {
-        let bytes = self.try_peek_const()?;
-        self.advance(N);
-        Ok(bytes)
-    }
-
-    /// Peek at a given number of bytes from the buffer, with a check to ensure
-    /// there are enough remaining
-    ///
-    /// If you know the array length at compile time, use
-    /// [`SafeBuf::try_peek_const`].
-    ///
-    /// # Errors
-    ///
-    /// This method will return an error if the number of bytes remaining in the
-    /// buffer is insufficent
-    fn try_peek(&mut self, len: usize) -> std::result::Result<Bytes, error::Truncated> {
+    fn try_copy_to_bytes(&mut self, len: usize) -> std::result::Result<Bytes, error::Truncated> {
         if self.remaining() < len {
             Err(error::Truncated)
         } else {
@@ -90,20 +51,20 @@ pub trait SafeBuf: Buf {
         }
     }
 
-    /// Take a given number of bytes from the buffer, with a check to ensure
-    /// there are enough remaining
-    ///
-    /// If you know the array length at compile time, use
-    /// [`SafeBuf::try_take_const`].
+    /// Take a given number of bytes from the buffer and write to a slice, with
+    /// a check to ensure there are enough remaining
     ///
     /// # Errors
     ///
     /// This method will return an error if the number of bytes remaining in the
     /// buffer is insufficent
-    fn try_take(&mut self, len: usize) -> std::result::Result<Bytes, error::Truncated> {
-        let bytes = self.try_peek(len)?;
-        self.advance(len);
-        Ok(bytes)
+    fn try_copy_to_slice(&mut self, dst: &mut [u8]) -> std::result::Result<(), error::Truncated> {
+        if self.remaining() < dst.len() {
+            Err(error::Truncated)
+        } else {
+            self.copy_to_slice(dst);
+            Ok(())
+        }
     }
 
     /// Read a custom object from a buffer
@@ -164,6 +125,28 @@ mod tests {
 
     use super::SafeBuf;
     use crate::BufMut;
+
+    #[test]
+    fn try_copy_to_bytes() {
+        let mut bytes = BytesMut::new();
+        bytes.extend_from_slice(&[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+
+        assert!(bytes.try_copy_to_bytes(4).is_ok());
+        assert!(bytes.try_copy_to_bytes(4).is_ok());
+        assert!(bytes.try_copy_to_bytes(4).is_err());
+    }
+
+    #[test]
+    fn try_copy_to_slice() {
+        let mut bytes = BytesMut::new();
+        bytes.extend_from_slice(&[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+
+        let dst = &mut [0_u8; 4];
+
+        assert!(bytes.try_copy_to_slice(dst).is_ok());
+        assert!(bytes.try_copy_to_slice(dst).is_ok());
+        assert!(bytes.try_copy_to_slice(dst).is_err());
+    }
 
     macro_rules! round_trip {
         ($t:ty) => {
