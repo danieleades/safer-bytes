@@ -156,3 +156,40 @@ pub trait SafeBuf: Buf {
 }
 
 impl<T> SafeBuf for T where T: Buf {}
+
+#[cfg(test)]
+mod tests {
+    use bytes::BytesMut;
+    use paste::paste;
+
+    use super::SafeBuf;
+    use crate::BufMut;
+
+    macro_rules! round_trip {
+        ($t:ty) => {
+            paste! {
+                #[test]
+                fn [<round_trip_ $t>]() {
+                    let mut buffer = BytesMut::new();
+                    let input = 17;
+
+                    buffer.[<put_ $t>](input);
+                    let output = buffer.[<try_get_ $t>]().unwrap();
+
+                    assert!(buffer.[<try_get_ $t>]().is_err());
+                    assert_eq!(input, output);
+                    assert!(buffer.is_empty());
+                }
+            }
+        };
+    }
+
+    round_trip!(u8);
+    round_trip!(i8);
+    round_trip!(u16);
+    round_trip!(i16);
+    round_trip!(u32);
+    round_trip!(i32);
+    round_trip!(u64);
+    round_trip!(i64);
+}
