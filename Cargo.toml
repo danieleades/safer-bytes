@@ -1,6 +1,6 @@
 [package]
 name = "safer-bytes"
-version = "0.1.1"
+version = "0.2.0"
 edition = "2018"
 description = "safe, non-panicking wrappers around the 'bytes' crate"
 license = "MIT"
@@ -14,3 +14,10 @@ categories = ["network-programming", "data-structures"]
 bytes = "1.0.1"
 paste = "1.0.5"
 thiserror = "1.0.26"
+
+[dev-dependencies]
+criterion = "0.3.5"
+
+[[bench]]
+name = "benchmark"
+harness = false
