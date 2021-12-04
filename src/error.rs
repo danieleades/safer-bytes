@@ -11,11 +11,6 @@ pub enum Error {
     /// Called Reader::should_be_exhausted(), but found bytes anyway.
     #[error(transparent)]
     ExtraneousBytes(#[from] ExtraneousBytes),
-
-    /// An attempt to parse an object failed for some reason related to its
-    /// contents.
-    #[error("deserialisation error: {0}")]
-    Deserialization(&'static str),
 }
 
 /// Tried to read something, but not enough bytes left in the buffer
