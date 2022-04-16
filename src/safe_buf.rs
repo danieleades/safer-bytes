@@ -1,8 +1,9 @@
 //! Extension traits for extracting custom objects from a [`bytes::Buf`]
 
-use crate::{error, FromBuf};
 use bytes::{Buf, Bytes};
 use paste::paste;
+
+use crate::{error, FromBuf};
 
 macro_rules! get_primitive_checked_be {
     ($t:ty, $width:literal) => {
